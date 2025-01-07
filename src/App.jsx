@@ -10,35 +10,58 @@ const App = () => {
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [loading, setLoading] = useState(false);
   const [favorites, setFavorites] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1); // New pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalResults, setTotalResults] = useState(0); // Track total results
 
+  // Load favorites from localStorage
   useEffect(() => {
     const savedFavorites = JSON.parse(localStorage.getItem("favorites")) || [];
     setFavorites(savedFavorites);
   }, []);
 
+  // Save favorites to localStorage
   useEffect(() => {
     localStorage.setItem("favorites", JSON.stringify(favorites));
   }, [favorites]);
 
-  const fetchMoviesFromAPI = async (searchTerm, page = 1) => { // Accept `page`
+  // Fetch movies from the API
+  const fetchMoviesFromAPI = async (searchTerm, page = 1) => {
+    console.log("Fetching Movies for:", searchTerm, "Page:", page); // Debugging
     setError("");
     setQuery(searchTerm);
     setLoading(true);
-    try {
-      const results = await fetchMovies(searchTerm, page); // Include `page`
-      setMovies(results || []);
-      setCurrentPage(page); // Update current page
-      if (!results || results.length === 0) {
-        setError(`No movies found for "${searchTerm}".`);
-      }
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
+    try {
+        const results = await fetchMovies(searchTerm, page); // Include `page`
+        console.log("Full API Response:", results); // Debugging
+
+        setMovies(results || []);
+        console.log("Movies Array Updated:", results); // Debugging
+
+        // Try to fetch totalResults from the API response
+        if (results?.totalResults) {
+            setTotalResults(parseInt(results.totalResults, 10));
+            console.log("Total Results Updated:", results.totalResults); // Debugging
+        } else {
+            console.log("No totalResults found in API response"); // Debugging
+            // Optional: Set a default or fallback for total results
+            setTotalResults(results.length * 10); // Assuming 10 results per page
+        }
+
+        setCurrentPage(page); // Update current page
+
+        if (!results || results.length === 0) {
+            setError(`No movies found for "${searchTerm}".`);
+        }
+    } catch (err) {
+        setError(err.message);
+    } finally {
+        setLoading(false);
+    }
+};
+
+
+  // Handle movie click to show details
   const handleMovieClick = async (id) => {
     try {
       const movie = await fetchMovieDetails(id);
@@ -48,12 +71,14 @@ const App = () => {
     }
   };
 
+  // Handle clearing search results
   const handleClear = () => {
     setMovies([]);
     setQuery("");
     setError("");
   };
 
+  // Add or remove favorite movies
   const toggleFavorite = (movie) => {
     if (favorites.some((fav) => fav.imdbID === movie.imdbID)) {
       setFavorites(favorites.filter((fav) => fav.imdbID !== movie.imdbID));
@@ -62,19 +87,27 @@ const App = () => {
     }
   };
 
+  // Check if a movie is a favorite
   const isFavorite = (movie) => {
     return favorites.some((fav) => fav.imdbID === movie.imdbID);
   };
 
+  // Pagination: Go to the next page
   const handleNextPage = () => {
-    fetchMoviesFromAPI(query, currentPage + 1);
+    if (currentPage < Math.ceil(totalResults / 10)) {
+      fetchMoviesFromAPI(query, currentPage + 1);
+    }
   };
 
+  // Pagination: Go to the previous page
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       fetchMoviesFromAPI(query, currentPage - 1);
     }
   };
+
+  // Calculate total pages
+  const totalPages = Math.ceil(totalResults / 10);
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
@@ -115,23 +148,27 @@ const App = () => {
           </div>
         ))}
       </div>
-      {movies.length > 0  && (<div className="flex justify-between items-center mt-6 w-full max-w-md">
-        <button
-          onClick={handlePreviousPage}
-          disabled={currentPage === 1}
-          className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 disabled:bg-gray-200"
-        >
-          Previous
-        </button>
-        <span className="text-gray-700">Page {currentPage}</span>
-        <button
-          onClick={handleNextPage}
-          disabled={movies.length < 10}
-          className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 disabled:bg-gray-200"
-        >
-          Next
-        </button>
-      </div>)}
+      {movies.length > 0 && totalPages > 1 && (
+        <div className="flex justify-center items-center mt-6 space-x-2">
+          <button
+            onClick={handlePreviousPage}
+            disabled={currentPage === 1}
+            className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 disabled:bg-gray-200"
+          >
+            Previous
+          </button>
+          <span className="text-gray-700">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={handleNextPage}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 disabled:bg-gray-200"
+          >
+            Next
+          </button>
+        </div>
+      )}
       {selectedMovie && (
         <MovieDetails movie={selectedMovie} onClose={() => setSelectedMovie(null)} />
       )}
