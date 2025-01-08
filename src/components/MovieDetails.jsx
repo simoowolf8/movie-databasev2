@@ -1,6 +1,8 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 const MovieDetails = ({ movie, onClose }) => {
+  const { t } = useTranslation();
   if (!movie) return null;
 
   return (
@@ -10,7 +12,7 @@ const MovieDetails = ({ movie, onClose }) => {
           onClick={onClose}
           className="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
         >
-          Close
+          {t("close_button")} {/* Translated "Close" */}
         </button>
         <img
           src={movie.Poster !== "N/A" ? movie.Poster : "/placeholder-image.jpg"}

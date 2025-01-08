@@ -1,0 +1,16 @@
+{
+    "header": "Search Movies",
+    "search_placeholder": "Enter movie title...",
+    "search_button": "Search",
+    "clear_button": "Clear",
+    "favorites": "Favorites",
+    "error_message": "No movies found for \"{{query}}\".",
+    "loading_message": "Loading...",
+    "add_to_favorites": "Add to Favorites",
+    "remove_favorite": "Remove Favorite",
+    "close_button": "Close",
+    "pagination_previous": "Previous",
+    "pagination_next": "Next",
+    "pagination_page": "Page {{currentPage}} of {{totalPages}}"
+  }
+  

@@ -1,0 +1,16 @@
+{
+    "header": "Rechercher des Films",
+    "search_placeholder": "Entrez le titre d'un film...",
+    "search_button": "Rechercher",
+    "clear_button": "Effacer",
+    "favorites": "Favoris",
+    "error_message": "Aucun film trouvé pour \"{{query}}\".",
+    "loading_message": "Chargement...",
+    "add_to_favorites": "Ajouter aux favoris",
+    "remove_favorite": "Retirer des favoris",
+    "close_button": "Fermer",
+    "pagination_previous": "Précédent",
+    "pagination_next": "Suivant",
+    "pagination_page": "Page {{currentPage}} sur {{totalPages}}"
+  }
+  
